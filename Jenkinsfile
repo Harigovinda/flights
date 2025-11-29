@@ -1,12 +1,11 @@
 pipeline {
     agent any
+
     stages {
         stage('Build') {
             steps {
-                clean install
+                sh 'mvn clean install'
             }
         }
-        
-        
     }
 }
