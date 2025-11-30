@@ -21,14 +21,11 @@ pipeline {
 
         stage('Run Docker Container') {
             steps {
-                // stop old container if running
                 bat '''
-                docker stop flights-app-container || true
-                docker rm flights-app-container || true
+                docker stop flights-app-container 2>NUL
+                docker rm flights-app-container 2>NUL
+                docker run -d -p 8085:8085 --name flights-app-container flights-app
                 '''
-
-                // run new container
-                bat 'docker run -d -p 8085:8085 --name flights-app-container flights-app'
             }
         }
     }
