@@ -2,50 +2,33 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven set up'   // Your Maven installation name in Jenkins
-    }
-
-    environment {
-        IMAGE_NAME = "flights-app"
-        CONTAINER_NAME = "flights-container"
+        maven 'Maven set up'
     }
 
     stages {
 
-        stage('Build Maven') {
+        stage('Build') {
             steps {
-                echo "Building Spring Boot application..."
-                bat "mvn clean install -DskipTests"
+                bat 'mvn clean install -DskipTests'
             }
         }
 
-        stage('Docker Build') {
+        stage('Build Docker Image') {
             steps {
-                echo "Building Docker image..."
-                script {
-                    docker.build("${IMAGE_NAME}")
-                }
+                bat 'docker build -t flights-app .'
             }
         }
 
-        stage('Stop Old Container') {
+        stage('Run Docker Container') {
             steps {
-                script {
-                    echo "Stopping old container if exists..."
-                    bat """
-                    docker stop %CONTAINER_NAME% || echo No container to stop
-                    docker rm %CONTAINER_NAME% || echo No container to remove
-                    """
-                }
-            }
-        }
+                // stop old container if running
+                bat '''
+                docker stop flights-app-container || true
+                docker rm flights-app-container || true
+                '''
 
-        stage('Run New Docker Container') {
-            steps {
-                echo "Starting new Docker container..."
-                bat """
-                docker run -d -p 8085:8085 --name %CONTAINER_NAME% %IMAGE_NAME%
-                """
+                // run new container
+                bat 'docker run -d -p 8085:8085 --name flights-app-container flights-app'
             }
         }
     }
